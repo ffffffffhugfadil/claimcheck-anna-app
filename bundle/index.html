@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ClaimCheck — the document that proves itself</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600&display=swap');
+  :root{
+    --room:#14171c; --paper:#f1ece0; --paper-2:#e8e1d0; --ink:#20231f; --ink-soft:#5a574c;
+    --stamp-red:#a6342a; --stamp-red-glow:rgba(166,52,42,0.18);
+    --stamp-green:#2f6b4f; --stamp-green-glow:rgba(47,107,79,0.18);
+    --gold:#b8923f; --rule:rgba(32,35,31,0.14);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--room);
+    background-image:radial-gradient(ellipse at top, rgba(184,146,63,0.06), transparent 60%);
+    color:var(--paper); font-family:'Inter',sans-serif; min-height:100vh; padding:32px 20px 60px;
+  }
+  .frame{max-width:780px; margin:0 auto;}
+  header{display:flex; align-items:flex-end; justify-content:space-between; border-bottom:1px solid rgba(241,236,224,0.18); padding-bottom:16px; margin-bottom:28px;}
+  .mark{display:flex; align-items:baseline; gap:12px;}
+  .glyph{width:34px; height:34px; border-radius:50%; border:2px solid var(--gold); display:flex; align-items:center; justify-content:center; font-family:'IBM Plex Mono',monospace; font-size:14px; color:var(--gold); transform:rotate(-6deg); flex-shrink:0;}
+  h1{font-family:'Source Serif 4',serif; font-weight:700; font-size:26px; margin:0; color:var(--paper);}
+  .tagline{font-size:12px; color:rgba(241,236,224,0.5); font-style:italic;}
+  #connStatus{font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:rgba(241,236,224,0.4);}
+  .desk{background:var(--paper); border-radius:3px; box-shadow:0 24px 50px -18px rgba(0,0,0,0.55); padding:28px 28px 24px; position:relative;}
+  label.field-label{display:block; font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:0.08em; text-transform:uppercase; color:var(--ink-soft); margin-bottom:8px;}
+  textarea{width:100%; min-height:130px; resize:vertical; background:var(--paper-2); border:1px solid var(--rule); border-radius:2px; padding:14px 16px; font-family:'IBM Plex Mono',monospace; font-size:13px; line-height:1.6; color:var(--ink);}
+  textarea:focus{outline:2px solid var(--gold); outline-offset:1px;}
+  .desk-foot{display:flex; align-items:center; justify-content:space-between; margin-top:14px; gap:14px; flex-wrap:wrap;}
+  .samples{display:flex; gap:8px; flex-wrap:wrap;}
+  .sample-btn{background:transparent; border:1px solid var(--rule); color:var(--ink-soft); font-size:11.5px; padding:6px 11px; border-radius:2px; cursor:pointer;}
+  .sample-btn:hover{border-color:var(--ink-soft); color:var(--ink);}
+  button.examine{background:var(--ink); color:var(--paper); font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:0.06em; text-transform:uppercase; border:none; border-radius:2px; padding:12px 22px; cursor:pointer;}
+  button.examine:disabled{opacity:0.45; cursor:wait;}
+  .verdict-strip{display:none; margin-top:24px; padding-top:20px; border-top:1px solid var(--rule);}
+  .verdict-strip.show{display:block;}
+  .ring-row{display:flex; align-items:center; gap:18px; margin-bottom:18px;}
+  .ring{width:56px; height:56px; flex-shrink:0;}
+  .ring-label .big{font-family:'IBM Plex Mono',monospace; font-size:20px; color:var(--ink); font-weight:600;}
+  .ring-label .small{font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--ink-soft); letter-spacing:0.05em; text-transform:uppercase;}
+  .claims{display:flex; flex-direction:column; gap:12px;}
+  .claim-card{border:1px solid var(--rule); border-radius:2px; padding:14px 16px; display:flex; gap:14px; align-items:flex-start; background:rgba(255,255,255,0.25);}
+  .claim-card.fail{background:var(--stamp-red-glow);}
+  .claim-card.pass{background:var(--stamp-green-glow);}
+  .stamp{flex-shrink:0; width:58px; height:58px; border-radius:50%; border:2.5px double currentColor; display:flex; align-items:center; justify-content:center; font-family:'IBM Plex Mono',monospace; font-size:9px; font-weight:600; letter-spacing:0.04em; text-align:center; line-height:1.2; transform:rotate(-7deg);}
+  .stamp.pass{color:var(--stamp-green);} .stamp.fail{color:var(--stamp-red);} .stamp.unverifiable{color:var(--ink-soft);}
+  .claim-body{flex:1; min-width:0;}
+  .claim-text{font-size:13px; color:var(--ink); margin-bottom:6px; line-height:1.5;}
+  .claim-numbers{font-family:'IBM Plex Mono',monospace; font-size:11.5px; display:flex; gap:14px; flex-wrap:wrap;}
+  .claim-numbers span{color:var(--ink-soft);} .claim-numbers b{color:var(--ink);}
+  .claim-numbers .delta-fail{color:var(--stamp-red); font-weight:600;}
+  .actions-row{display:flex; justify-content:flex-end; gap:10px; margin-top:20px;}
+  .btn-ghost{background:transparent; border:1px solid var(--rule); color:var(--ink-soft); font-size:12px; padding:9px 16px; border-radius:2px; cursor:pointer;}
+  .btn-save{background:var(--gold); border:none; color:#1c1505; font-family:'IBM Plex Mono',monospace; font-size:11.5px; letter-spacing:0.05em; text-transform:uppercase; padding:9px 18px; border-radius:2px; cursor:pointer; font-weight:600;}
+  .archive{margin-top:32px;}
+  .archive h2{font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:0.08em; text-transform:uppercase; color:rgba(241,236,224,0.45); margin-bottom:12px;}
+  .archive-item{display:flex; justify-content:space-between; gap:12px; padding:9px 0; border-bottom:1px solid rgba(241,236,224,0.1); font-size:12.5px; color:rgba(241,236,224,0.75);}
+  .archive-item .score{font-family:'IBM Plex Mono',monospace; color:var(--gold); flex-shrink:0;}
+  .empty-archive{color:rgba(241,236,224,0.35); font-size:12.5px; font-style:italic;}
+  .note{font-size:11px; color:rgba(241,236,224,0.4); margin-top:18px; line-height:1.6;}
+</style>
+</head>
+<body>
+<div class="frame">
+  <header>
+    <div class="mark">
+      <div class="glyph">✓</div>
+      <div><h1>ClaimCheck</h1><div class="tagline">the document that proves itself</div></div>
+    </div>
+    <div id="connStatus">connecting…</div>
+  </header>
+
+  <div class="desk">
+    <label class="field-label" for="docInput">Exhibit — paste any document with numbers, percentages, or dates</label>
+    <textarea id="docInput" placeholder="Paste an invoice, contract clause, or expense report here, or pick a sample below."></textarea>
+
+    <div class="desk-foot">
+      <div class="samples">
+        <button class="sample-btn" data-sample="invoice">Sample: Invoice</button>
+        <button class="sample-btn" data-sample="contract">Sample: Contract clause</button>
+        <button class="sample-btn" data-sample="bad">Sample: With an error</button>
+      </div>
+      <button class="examine" id="examineBtn">Examine document →</button>
+    </div>
+
+    <div class="verdict-strip" id="verdictStrip">
+      <div class="ring-row">
+        <svg class="ring" viewBox="0 0 64 64" id="ringSvg">
+          <circle cx="32" cy="32" r="27" fill="none" stroke="rgba(32,35,31,0.12)" stroke-width="7"/>
+          <circle cx="32" cy="32" r="27" fill="none" stroke="#2f6b4f" stroke-width="7" stroke-linecap="round" id="ringProgress" stroke-dasharray="169.6" stroke-dashoffset="169.6" transform="rotate(-90 32 32)"/>
+        </svg>
+        <div class="ring-label">
+          <div class="big" id="ringScore">0 / 0</div>
+          <div class="small">claims hold up under examination</div>
+        </div>
+      </div>
+      <div class="claims" id="claimsList"></div>
+      <div class="actions-row">
+        <button class="btn-ghost" id="discardBtn">Discard</button>
+        <button class="btn-save" id="saveBtn">Save to archive</button>
+      </div>
+    </div>
+
+    <div class="note">Claim extraction in this build runs from built-in samples + a light local parser (no LLM call wired yet — pending confirmed <code>anna.llm</code> host API). Verification is always the real <code>tool-dev-claimcheck</code> Executa, never simulated.</div>
+  </div>
+
+  <div class="archive">
+    <h2>Archive</h2>
+    <div id="archiveList"><div class="empty-archive">No examined documents yet.</div></div>
+  </div>
+</div>
+
+<script src="./app.js" type="module"></script>
+</body>
+</html>
