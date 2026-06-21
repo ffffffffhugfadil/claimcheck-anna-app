@@ -2,7 +2,6 @@
 
 **Paste any document with numbers, percentages, or dates. AI extracts the claims. A deterministic engine proves or disproves every one of them.**
 
-Built for [Anna AI-Native App Hackathon](https://dorahacks.io/hackathon/anna-ai-native-app/detail)
 
 ---
 
